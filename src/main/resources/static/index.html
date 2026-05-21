@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Wellington Eletrônicos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+   <header>
+    <div class="header-top">
+        <h1>⚡ Wellington 
+                Eletrônicos
+        </h1>
+        <form class="busca-container">
+            <input type="text" id="campoBusca" placeholder="Buscar Produtos...">
+            <button type="submit">🔍</button>
+        </form>
+    <div class="carrinho-icon" onclick="abrirCarrinho()">
+            🛒 <span id="contador-carrinho">0</span>
+        </div>
+        <div id="area-usuario">
+    <a href="login.html" class="btn-login">Entrar</a>
+</div>
+    </div>
+</header>
+    <section id="produtos">
+        <h2>Nossos Produtos</h2>
+        <div id="lista-produtos"></div>
+    </section>
+
+   <script>
+    const usuarioLogado = localStorage.getItem('usuarioLogado');
+if (!usuarioLogado) {
+    window.location.href = 'login.html';
+}
+document.querySelector('.busca-container').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const busca = document.getElementById('campoBusca').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const nome = card.querySelector('h3').textContent.toLowerCase();
+        if (nome.includes(busca)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+
+    document.getElementById('area-usuario').innerHTML = 
+        `<span style="color:white">Olá, ${usuarioLogado}!</span> 
+         <a href="#" onclick="logout()" style="color:white;margin-left:10px">Sair</a>`;
+
+
+function logout() {
+    localStorage.removeItem('usuarioLogado');
+    window.location.reload();
+}
+
+let carrinho = [];
+
+function adicionarCarrinho(nome, preco) {
+    carrinho.push({ nome, preco });
+    document.getElementById('contador-carrinho').textContent = carrinho.length;
+    alert(nome + ' adicionado ao carrinho!');
+}
+
+function removerCarrinho(index) {
+    carrinho.splice(index, 1);
+    document.getElementById('contador-carrinho').textContent = carrinho.length;
+    abrirCarrinho();
+}
+
+function abrirCarrinho() {
+    const panel = document.getElementById('carrinho-panel');
+    panel.style.display = 'block';
+    const itens = document.getElementById('carrinho-itens');
+    itens.innerHTML = '';
+    let total = 0;
+    carrinho.forEach((item, index) => {
+        itens.innerHTML += `
+            <div class="carrinho-item">
+                <p>${item.nome} - R$ ${item.preco}</p>
+                <button onclick="removerCarrinho(${index})" class="btn-remover">🗑️ Remover</button>
+            </div>
+        `;
+        total += item.preco;
+    });
+    document.getElementById('carrinho-total').textContent = total.toFixed(2);
+}
+function fecharCarrinho() {
+    document.getElementById('carrinho-panel').style.display = 'none';
+}
+let produtoAtual = null;
+
+function abrirModal(nome, descricao, preco, imagemUrl) {
+    produtoAtual = { nome, preco };
+    document.getElementById('modal-img').src = imagemUrl;
+    document.getElementById('modal-nome').textContent = nome;
+    document.getElementById('modal-descricao').textContent = descricao;
+    document.getElementById('modal-preco').textContent = preco;
+    document.getElementById('modal-produto').style.display = 'block';
+}
+
+function fecharModal() {
+    document.getElementById('modal-produto').style.display = 'none';
+}
+
+function adicionarCarrinhoModal() {
+    if (produtoAtual) {
+        adicionarCarrinho(produtoAtual.nome, produtoAtual.preco);
+        fecharModal();
+    }
+}
+fetch('/produtos')
+    .then(response => response.json())
+    .then(produtos => {
+        const lista = document.getElementById('lista-produtos');
+        produtos.forEach(produto => {
+           lista.innerHTML += `
+    <div class="card" onclick="abrirModal('${produto.nome}', '${produto.descricao}', ${produto.preco}, '${produto.imagemUrl}')">
+        <img src="${produto.imagemUrl}" alt="${produto.nome}">
+        <h3>${produto.nome}</h3>
+        <p>${produto.descricao}</p>
+        <p>R$ ${produto.preco}</p>
+
+        <button onclick="event.stopPropagation(); adicionarCarrinho('${produto.nome}', ${produto.preco})" class="btn-carrinho">
+            🛒 Adicionar ao Carrinho
+        </button>
+    </div>
+`;
+        });
+    });
+    function finalizarPagamento() {
+    if (carrinho.length === 0) {
+        alert('Carrinho vazio!');
+        return;
+    }
+    fetch('/pagamento/criar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(carrinho)
+    })
+    .then(r => r.text())
+    .then(url => {
+        window.location.href = url;
+    });
+}
+</script>
+<footer>
+    <div class="footer-content">
+        <h2>⚡ Wellington Eletrônicos</h2>
+        <p>Tecnologia de qualidade para quem não abre mão do melhor.</p>
+        <div class="footer-contato">
+            <p>📱 (81) 92273-9302</p>
+            <p>📧 wellingtonlinsda@gmail.com</p>
+        </div>
+        <p class="footer-direitos">© 2026 Wellington Eletrônicos - Todos os direitos reservados</p>
+    </div>
+</footer>
+<div id="carrinho-panel" style="display:none"> 
+    <div class="carrinho-header"> 
+        <h3>🛒 Meu Carrinho</h3> 
+        <button onclick="fecharCarrinho()">✕</button> 
+    </div> 
+
+    <div id="carrinho-itens"></div> 
+
+    <div class="carrinho-total"> 
+        <strong>Total: R$ <span id="carrinho-total">0</span></strong> 
+    </div> 
+
+    <button onclick="finalizarPagamento()" class="btn-finalizar">
+    💳 Finalizar Compra
+</button>
+<div id="modal-produto" style="display:none">
+    <div class="modal-overlay" onclick="fecharModal()"></div>
+    <div class="modal-content">
+        <button class="modal-fechar" onclick="fecharModal()">✕</button>
+        <img id="modal-img" src="" alt="">
+        <div class="modal-info">
+            <h2 id="modal-nome"></h2>
+            <p id="modal-descricao"></p>
+            <p class="modal-preco">R$ <span id="modal-preco"></span></p>
+            <button onclick="adicionarCarrinhoModal()" class="btn-carrinho">
+                🛒 Adicionar ao Carrinho
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

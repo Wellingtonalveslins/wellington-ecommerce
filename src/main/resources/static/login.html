@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Wellington Eletrônicos</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <h1>⚡ Wellington Eletrônicos</h1>
+    </div>
+</header>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Entrar na sua conta</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="senha" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p>Não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
+    </div>
+</div>
+
+<script>
+function login() {
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+    fetch('/usuarios/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+    })
+    .then(r => r.text())
+    .then(resposta => {
+        if (resposta.startsWith('LOGIN_OK:')) {
+            const nome = resposta.split(':')[1];
+            localStorage.setItem('usuarioLogado', nome);
+            window.location.href = 'index.html';
+        } else {
+            alert('Email ou senha incorretos!');
+        }
+    });
+}
+</script>
+
+</body>
+</html>
