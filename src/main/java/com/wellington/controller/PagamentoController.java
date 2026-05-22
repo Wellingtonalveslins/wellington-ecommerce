@@ -4,6 +4,7 @@ import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.*;
 import com.mercadopago.resources.preference.Preference;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -11,9 +12,12 @@ import java.util.List;
 @RequestMapping("/pagamento")
 public class PagamentoController {
 
+@Value("${mp.access.token}")
+private String accessToken;
+
     @PostMapping("/criar")
     public String criarPagamento(@RequestBody List<ItemRequest> itens) throws Exception {
-        MercadoPagoConfig.setAccessToken("APP_USR-2032993205069418-051407-8729d18c4babf882690a8662640b5278-3402580890");
+        MercadoPagoConfig.setAccessToken(accessToken);
 
         PreferenceItemRequest item = PreferenceItemRequest.builder()
             .title(itens.get(0).getNome())
