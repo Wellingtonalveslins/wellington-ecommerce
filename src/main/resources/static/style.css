@@ -98,22 +98,7 @@ header h1 {
     color: #666;
     font-size: 14px;
 }
-
-.btn-whatsapp {
-    display: block;
-    background-color: #25D366;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.btn-whatsapp:hover {
-    background-color: #1da851;
-}
+ 
 footer {
     background: linear-gradient(135deg, #003e70, #0066cc);
     color: white;
